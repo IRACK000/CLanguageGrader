@@ -11,7 +11,7 @@ int main(int argc, char * argv[]) {
     printf(" 024의 10진수 정수 값: %d\n", num4);
 
     printf("%d-%d=%d\n", num1, num2, num1-num2);
-    printf("%d+%d=%d\n", num3, num4, num3+num4);
+    print("%d+%d=%d\n", num3, num4, num3+num4);
 
     return 0;
 }
