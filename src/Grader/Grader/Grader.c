@@ -17,7 +17,7 @@ int main(int argc, char * argv[]) {
         }
     }
     if (programmode == 3) {
-        printf("INFO: 자동 실행 모드로 진행합니다.\n\n");
+        printf("INFO: 자동 실행 모드로 진행합니다.\n\n");  // TODO: 로깅 모드 구현
         programmode = 2;
     } else {
         while (1) {
@@ -85,7 +85,7 @@ int main(int argc, char * argv[]) {
     // 컴파일
     system("COLOR 07");
     for (int directory = 0; directory < dir_count; directory++) {
-        compile_sources(path, dir_list[directory], programmode == 2 /* if debug then true */);
+        compile_sources(path, NULL, dir_list[directory], programmode == 2 /* if debug then true */);
     }
     system("COLOR 06");
 

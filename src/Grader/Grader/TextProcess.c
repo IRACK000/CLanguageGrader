@@ -1,14 +1,20 @@
 #include "TextProcess.h"
 
 
-void compile_sources(PathList path, char * dir_list, _Bool debug) {
+void compile_sources(PathList path, char * dir_prefix, char * dir_list, _Bool debug) {
     char cmd_buffer[CMD_BUFFER] = { 0 };  // formatted string 보관용
     system("CLS");
     printf("타켓 학생은 %s입니다.\n", dir_list);
 
+    // Dir Prefix 설정
+    char __dir_prefix[] = "HOMEWORK\\";
+    if (dir_prefix == NULL) {
+        dir_prefix = __dir_prefix;
+    }
+
     // 컴파일러 설정 가져오기
     char compiler = 0;
-    sprintf(cmd_buffer, "HOMEWORK\\%s\\compiler.setting", dir_list);
+    sprintf(cmd_buffer, "%s%s\\compiler.setting", dir_prefix, dir_list);
     FILE * config = fopen(cmd_buffer, "r");
     if (config != NULL) {
         char compiler_buffer[ARR_SIZ] = { 0 };
@@ -28,16 +34,16 @@ void compile_sources(PathList path, char * dir_list, _Bool debug) {
     // 컴파일 진행
     if (compiler == 1) {
         printf("\nMSVC++로 컴파일을 진행합니다.\n");
-        sprintf(cmd_buffer, "\"%s\\VsDevCmd.bat\" && cd HOMEWORK\\%s && for %%f in (*.c) do cl /w %%f && del *.obj && dir", path.msvc, dir_list);
+        sprintf(cmd_buffer, "\"%s\\VsDevCmd.bat\" && cd %s%s && for %%f in (*.c) do cl /w %%f && del *.obj && dir", path.msvc, dir_prefix, dir_list);
     } else if (compiler == 2) {
         printf("\nClang로 컴파일을 진행합니다.\n");
-        sprintf(cmd_buffer, "\"%s\\VsDevCmd.bat\" && cd HOMEWORK\\%s && for %%f in (*.c) do clang -o %%~nf.exe %%f && dir", path.msvc, dir_list);
+        sprintf(cmd_buffer, "\"%s\\VsDevCmd.bat\" && cd %s%s && for %%f in (*.c) do clang -o %%~nf.exe %%f && dir", path.msvc, dir_prefix, dir_list);
     } else if (compiler == 3) {  // TODO: CMAKE로 컴파일 진행
         printf("\nCMAKE로 프로젝트를 빌드합니다.\n");
-        sprintf(cmd_buffer, "set \"path=%%path%%;%s\" && cd HOMEWORK\\%s && cmake .. && dir", path.cmake, dir_list);
+        sprintf(cmd_buffer, "set \"path=%%path%%;%s\" && cd %s%s && cmake .. && dir", path.cmake, dir_prefix, dir_list);
     } else {
         printf("\nGCC(DEFAULT)로 컴파일을 진행합니다.\n");
-        sprintf(cmd_buffer, "set \"path=%%path%%;%s\" && cd HOMEWORK\\%s && for %%f in (*.c) do gcc -o %%~nf.exe %%f && dir", path.gcc, dir_list);
+        sprintf(cmd_buffer, "set \"path=%%path%%;%s\" && cd %s%s && for %%f in (*.c) do gcc -o %%~nf.exe %%f && dir", path.gcc, dir_prefix, dir_list);
     }
     printf("%s\n", cmd_buffer);
     system(cmd_buffer);
@@ -172,7 +178,7 @@ void process_text(int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME], char
 }
 
 
-void set_new_answer(void) {
+void set_new_answer(PathList path) {
     int _;
 
     system("CLS");
@@ -185,6 +191,9 @@ void set_new_answer(void) {
     // 정답 파일 초기화
     system("RMDIR /s ANSWER");
     system("MKDIR ANSWER");
+
+    // 정답 소스 파일 있으면 컴파일
+    compile_sources(path, "ANSWER\\", "", 0);
 
     // 과제 이름 지정
     char hw_series[HOMEWORK_NAME-1] = { 0 };
@@ -220,35 +229,20 @@ void set_new_answer(void) {
             printf("\n%d번 문제의 %d번 평가식을 입력하세요: ", string_index, test_index);
             sprintf(cmd_buffer, "CALL notepad ANSWER\\%s%d\\%d.stdin", hw_series, string_index, test_index);
             system(cmd_buffer);
-            printf("\n%d번 문제의 %d번 답을 입력하세요: ", string_index, test_index);
-            sprintf(cmd_buffer, "CALL notepad ANSWER\\%s%d\\%d.stdout", hw_series, string_index, test_index);
-            system(cmd_buffer);
+            sprintf(cmd_buffer, "ANSWER\\%s%d.exe", hw_series, string_index);
+            if (is_exist(cmd_buffer, "", 0)) {
+                printf("\n%d번 문제의 정답 실행 파일이 존재합니다. 자동으로 해답 데이터를 생성합니다.", string_index);
+                sprintf(
+                    cmd_buffer,
+                    "ANSWER\\%s%d.exe  < ANSWER\\%s%d\\%d.stdin >  ANSWER\\%s%d\\%d.stdout",
+                    hw_series, string_index, hw_series, string_index, test_index, hw_series, string_index, test_index
+                );
+                system(cmd_buffer);
+            } else {
+                printf("\n%d번 문제의 %d번 답을 입력하세요: ", string_index, test_index);
+                sprintf(cmd_buffer, "CALL notepad ANSWER\\%s%d\\%d.stdout", hw_series, string_index, test_index);
+                system(cmd_buffer);
+            }
         }
     }
-}
-
-
-void print_result(char * dir_list, int * score, int dir_count) {
-    /*
-    char * dirlist = dir_list;
-    while (1) {
-        printf("과제 채점 점수표\n\n");
-        for (int directory = 0; directory < dir_count; directory++, dir_list += ARR_SIZ * 4) {
-            printf("%s - %d점\n", dir_list, *(score + directory));
-        }
-        printf("\n채점이 모두 끝났습니다.\n");
-        char detail_mode[ARR_SIZ * 4] = { 0 }; // 최대 51*4자리 이름까지
-        printf("점수 상세보기를 실행하시려면 학번_이름을 입력해주세요. (press N to shut down) : ");
-        gets_s(detail_mode, sizeof(detail_mode));
-        if (detail_mode[0] == 'N' || detail_mode[0] == 'n') {
-            break;
-        }
-        else {
-            char cmd_buffer[ARR_SIZ] = { 0 }; // formatted string 보관용
-            sprintf(cmd_buffer, "CALL RESULT\\%s.txt", detail_mode);
-            system(cmd_buffer);
-            system("CLS");
-            dir_list = dirlist;
-        }
-    }*/
 }

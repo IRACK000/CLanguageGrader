@@ -42,6 +42,8 @@
 *.su
 *.idb
 *.pdb
+x64
+RESULT_GRADE
 
 # Kernel Module Compile Results
 *.mod*
