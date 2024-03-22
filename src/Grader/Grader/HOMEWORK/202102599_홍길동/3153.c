@@ -3,16 +3,12 @@
 
 /* run this program using the console pauser or add your own getch, system("pause") or input loop */
 
+//문제 5 3153
 int main(int argc, char *argv[]) {
-	int result;
-	int num1, num2;
-	
-	printf("정수 one: ");
+	int num1, num2, num3;
 	scanf("%d", &num1);
-	printf("정수 two: ");
 	scanf("%d", &num2);
-	
-	result=num1+num2;
-	printf("%d + %d = %d \n", num1, num2, result);
-	return 0;
+	scanf("%d", &num3);
+	int result = (num1-num2)*(num1+num3)*(num3%num1);
+	printf("%d", result);
 }
