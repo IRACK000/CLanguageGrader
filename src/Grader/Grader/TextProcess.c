@@ -82,8 +82,8 @@ void test_excutables(int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME], c
             system(cmd_buffer);
         }
 
-        sprintf(cmd_buffer, "DEL HOMEWORK\\%s\\%s.exe", dir_list, hw_list[i]);
-        system(cmd_buffer);
+        //sprintf(cmd_buffer, "DEL HOMEWORK\\%s\\%s.exe", dir_list, hw_list[i]);  // 실행 파일 삭제 안함
+        //system(cmd_buffer);
     }
 
     // 디버그 로그
@@ -104,6 +104,11 @@ void process_text(int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME], char
     for (int i = 0; i < hw_amount; i++) {
         printf("%d번 과제를 채점합니다.\n", i+1);
         fprintf(score, "<div class=\"col-sm\"><h5>과제 %d (%s.c) 채점 결과</h5>\n", i+1, hw_list[i]);
+
+        sprintf(cmd_buffer, "HOMEWORK\\%s\\%s.exe", dir_list, hw_list[i]);
+        printf("%s", cmd_buffer);
+        _Bool is_compiled = is_exist(cmd_buffer, "", 0);
+        fprintf(score, "<div class=\"p-2 mb-2 bg-%s text-white test-result\">- 컴파일 %s</div>\n", (is_compiled) ? "dark" : "secondary", (is_compiled) ? "성공" : "실패");
 
         char ans[ARR_SIZ] = { 0 }, res[ARR_SIZ] = { 0 };
         int score_num = 0, total_test_case = 0;
