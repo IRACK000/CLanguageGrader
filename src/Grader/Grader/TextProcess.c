@@ -3,12 +3,12 @@
 
 void compile_sources(PathList path, char * dir_prefix, char * dir_list, _Bool debug) {
     char cmd_buffer[CMD_BUFFER] = { 0 };  // formatted string 보관용
-    system("CLS");
-    printf("타켓 학생은 %s입니다.\n", dir_list);
 
     // Dir Prefix 설정
     char __dir_prefix[] = "HOMEWORK\\";
     if (dir_prefix == NULL) {
+        system("CLS");
+        printf("타켓 학생은 %s입니다.\n", dir_list);
         dir_prefix = __dir_prefix;
     }
 
@@ -193,12 +193,14 @@ void set_new_answer(PathList path) {
     system("MKDIR ANSWER");
 
     // 정답 소스 파일 있으면 컴파일
+    printf("정답 소스 파일이 있다면 ANSWER 폴더 안에 넣어주세요.");
+    system("PAUSE");
     compile_sources(path, "ANSWER\\", "", 0);
 
     // 과제 이름 지정
     char hw_series[HOMEWORK_NAME-1] = { 0 };
     int hw_amount = 0;
-    printf("\n과제 날짜를 입력하세요 (MMDD, 최대 4자리): ");
+    printf("\n\n\n과제 날짜를 입력하세요 (MMDD, 최대 4자리): ");
     _ = scanf("%s", hw_series);
     while (1) {
         printf("\n과제 개수를 입력하세요 (1~9): ");
@@ -226,21 +228,21 @@ void set_new_answer(PathList path) {
         }
 
         for (int test_index = 0; test_index < test_count; test_index++) {
-            printf("\n%d번 문제의 %d번 평가식을 입력하세요: ", string_index, test_index);
-            sprintf(cmd_buffer, "CALL notepad ANSWER\\%s%d\\%d.stdin", hw_series, string_index, test_index);
+            printf("\n%d번 문제의 %d번 평가식을 입력하세요: ", string_index, test_index+1);
+            sprintf(cmd_buffer, "CALL notepad ANSWER\\%s%d\\%d.stdin", hw_series, string_index, test_index+1);
             system(cmd_buffer);
             sprintf(cmd_buffer, "ANSWER\\%s%d.exe", hw_series, string_index);
             if (is_exist(cmd_buffer, "", 0)) {
-                printf("\n%d번 문제의 정답 실행 파일이 존재합니다. 자동으로 해답 데이터를 생성합니다.", string_index);
+                printf("\n%d번 문제의 정답 실행 파일이 존재합니다. 자동으로 해답 데이터를 생성합니다.", string_index+1);
                 sprintf(
                     cmd_buffer,
                     "ANSWER\\%s%d.exe  < ANSWER\\%s%d\\%d.stdin >  ANSWER\\%s%d\\%d.stdout",
-                    hw_series, string_index, hw_series, string_index, test_index, hw_series, string_index, test_index
+                    hw_series, string_index, hw_series, string_index, test_index+1, hw_series, string_index, test_index+1
                 );
                 system(cmd_buffer);
             } else {
-                printf("\n%d번 문제의 %d번 답을 입력하세요: ", string_index, test_index);
-                sprintf(cmd_buffer, "CALL notepad ANSWER\\%s%d\\%d.stdout", hw_series, string_index, test_index);
+                printf("\n%d번 문제의 %d번 답을 입력하세요: ", string_index, test_index+1);
+                sprintf(cmd_buffer, "CALL notepad ANSWER\\%s%d\\%d.stdout", hw_series, string_index, test_index+1);
                 system(cmd_buffer);
             }
         }

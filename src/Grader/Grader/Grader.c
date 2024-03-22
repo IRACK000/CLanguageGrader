@@ -39,7 +39,7 @@ int main(int argc, char * argv[]) {
             );
 
             if (choice == 1) {  // 1번 선택시 새로운 스트링 입력
-                set_new_answer();
+                set_new_answer(path);
                 printf("\n\n\n"); system("PAUSE"); system("CLS");
             } else if (choice == 2) {  // 2번 선택시 기존 스트링 사용
                 break;
