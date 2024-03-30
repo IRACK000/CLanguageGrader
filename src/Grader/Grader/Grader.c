@@ -128,12 +128,13 @@ int main(int argc, char * argv[]) {
 
     // 결과 비교
     system("copy result_template.html RESULT_GRADE\\SCORE_OUT.html");  // HTML 템플릿 복사
+    FILE * score = fopen("RESULT_GRADE\\SCORE_OUT.html", "a+");
+    print_answer(score, hw_count, hw_list);  // 답안 출력
     system("CLS");
     printf("INFO: 결과 비교 시작 ---------------------------------------------------------------------\n");
     for (int directory = 0; directory < dir_count; directory++) {
-        process_text(hw_count, hw_list, dir_list[directory], programmode == 2 /* if debug then true */);
+        process_text(score, hw_count, hw_list, dir_list[directory], programmode == 2 /* if debug then true */);
     }
-    FILE * score = fopen("RESULT_GRADE\\SCORE_OUT.html", "a+");
     fprintf(score, "</div>\n</body>\n</html>\n");  // HTML 파일 마무리
     fclose(score);
 

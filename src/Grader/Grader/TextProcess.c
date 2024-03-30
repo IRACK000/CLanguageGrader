@@ -94,21 +94,28 @@ void test_excutables(int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME], c
 }
 
 
-void process_text(int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME], char * dir_list, _Bool debug) {
+void process_text(FILE * score, int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME], char * dir_list, _Bool debug) {
     char cmd_buffer[CMD_BUFFER] = { 0 };  // formatted string 보관용
     printf("\n\n\n타켓 학생은 %s입니다.\n", dir_list);
 
-    FILE * score = fopen("RESULT_GRADE\\SCORE_OUT.html", "a+");
     fprintf(score, "<div class=\"row\"><h4><%s></h4>\n", dir_list);
 
     for (int i = 0; i < hw_amount; i++) {
         printf("%d번 과제를 채점합니다.\n", i+1);
-        fprintf(score, "<div class=\"col-sm\"><h5>과제 %d (%s.c) 채점 결과</h5>\n", i+1, hw_list[i]);
+        fprintf(score, "<div class=\"col-md-6 col-lg-3\"><h5>과제 %d (%s.c) 채점 결과</h5>\n", i+1, hw_list[i]);
 
+        // 1. 제출된 과제 코드 출력
         sprintf(cmd_buffer, "HOMEWORK\\%s\\%s.exe", dir_list, hw_list[i]);
         printf("%s", cmd_buffer);
         _Bool is_compiled = is_exist(cmd_buffer, "", 0);
-        fprintf(score, "<div class=\"p-2 mb-2 bg-%s text-white test-result\">- 컴파일 %s</div>\n", (is_compiled) ? "dark" : "secondary", (is_compiled) ? "성공" : "실패");
+        sprintf(cmd_buffer, "HOMEWORK\\%s\\%s.c", dir_list, hw_list[i]);
+        _Bool is_code_exists = is_exist(cmd_buffer, "", 0);
+        FILE * answer = fopen(cmd_buffer, "r+");
+        print_c_code(answer, is_code_exists, is_compiled, score);
+        if (answer) {
+            fclose(answer);
+            answer = 0;
+        }
 
         char ans[ARR_SIZ] = { 0 }, res[ARR_SIZ] = { 0 };
         int score_num = 0, total_test_case = 0;
@@ -164,16 +171,22 @@ void process_text(int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME], char
             total_test_case++;
 
             printf("[%s] 과제 %d (%s.c) - %d번 테스트 케이스: %s\n", dir_list, i+1, hw_list[i], j+1, (is_correct) ? "[PASSED]" : "[FAILED]");
-            fprintf(score, "<div class=\"p-2 mb-2 bg-%s text-white test-result\">* 테스트 케이스 %d: %s</div>\n", (is_correct) ? "success" : "danger", j+1, (is_correct) ? "[PASSED]" : "[FAILED]");
-
             fclose(answer);
+            answer = 0;
             fclose(result);
+            result = 0;
+
+            result = fopen(cmd_buffer, "r+");
+            sprintf(cmd_buffer, "ANSWER\\%s\\%d.stdin", hw_list[i], j);
+            FILE * input = fopen(cmd_buffer, "r+");
+            print_test_case(result, input, is_correct, j, (is_correct) ? ": [PASSED]" : ": [FAILED]", score);
+            fclose(result);
+            result = 0;
         }
         printf(">> 총점: %d / %d점\n", score_num, total_test_case);
         fprintf(score, "<article class=\"markdown-body\"><pre>[총점]  %d / %d점</pre><br></article>\n</div>\n", score_num, total_test_case);
     }
     fprintf(score, "</div>\n");
-    fclose(score);
 
     // 디버그 로그
     if (debug) {
@@ -241,6 +254,11 @@ void set_new_answer(PathList path) {
                 printf("\n%d번 문제의 정답 실행 파일이 존재합니다. 자동으로 해답 데이터를 생성합니다.", string_index+1);
                 sprintf(
                     cmd_buffer,
+                    "ANSWER\\%s%d.exe  < ANSWER\\%s%d\\%d.stdin",
+                    hw_series, string_index, hw_series, string_index, test_index + 1
+                );
+                sprintf(
+                    cmd_buffer,
                     "ANSWER\\%s%d.exe  < ANSWER\\%s%d\\%d.stdin >  ANSWER\\%s%d\\%d.stdout",
                     hw_series, string_index, hw_series, string_index, test_index+1, hw_series, string_index, test_index+1
                 );
@@ -252,4 +270,162 @@ void set_new_answer(PathList path) {
             }
         }
     }
+}
+
+
+void print_answer(FILE * score, int hw_amount, char hw_list[MAX_HOMEWORK][HOMEWORK_NAME]) {
+    char cmd_buffer[CMD_BUFFER] = { 0 };  // formatted string 보관용
+
+    fprintf(score, "<div class=\"row\"><h4><과제 정답지></h4>\n");
+
+    for (int i = 0; i < hw_amount; i++) {
+        fprintf(score, "<div class=\"col-md-6 col-lg-3\"><h5>과제 %d (%s.c) 정답 리스트</h5>\n", i + 1, hw_list[i]);
+
+        // 1. 과제 정답 코드 출력
+        sprintf(cmd_buffer, "ANSWER\\%s.c", hw_list[i]);
+        _Bool is_code_exists = is_exist(cmd_buffer, "", 0);
+        FILE * answer = fopen(cmd_buffer, "r+");
+        print_c_code(answer, is_code_exists, -1, score);
+        if (answer) {
+            fclose(answer);
+            answer = 0;
+        }
+
+        // 2. 과제 테스트 케이스 정답 출력
+        for (int j = 0; j < MAX_ANSWER; j++) {
+            sprintf(cmd_buffer, "ANSWER\\%s\\%d.stdout", hw_list[i], j);
+            if (!is_exist(cmd_buffer, "", 0)) {
+                break;
+            }
+            FILE * answer = fopen(cmd_buffer, "r+");
+            sprintf(cmd_buffer, "ANSWER\\%s\\%d.stdin", hw_list[i], j);
+            FILE * input = fopen(cmd_buffer, "r+");
+            print_test_case(answer, input, -1, j, "", score);
+            fclose(answer);
+            answer = 0;
+            fclose(input);
+            input = 0;
+        }
+        fprintf(score, "</div>\n");
+    }
+    fprintf(score, "</div><br><br>\n");
+}
+
+
+void print_c_code(FILE * answer, _Bool is_code_exists, short compile_status, FILE * score) {
+    const char source_found[] = "정답 코드 발견됨";
+    const char source_not_found[] = "정답 코드 없음";
+    const char compile_success[] = "컴파일 성공";
+    const char compile_failed[] = "컴파일 실패";
+    const char not_submitted[] = "코드 미제출";
+
+    char * state_text = 0;
+    _Bool status = 0;
+    if (compile_status < 0) {
+        state_text = (is_code_exists) ? source_found : source_not_found;
+        status = is_code_exists;
+    } else if (compile_status == 0) {
+        state_text = (is_code_exists) ? compile_failed : not_submitted;
+        status = 0;
+    } else {
+        state_text = compile_success;
+        status = 1;
+    }
+
+    fprintf(score, "<div class=\"p-2 mb-2 bg-%s text-white test-result\"><details><summary>%s</summary><pre class=\"mb-0\">\n", (status) ? "dark" : "secondary ", state_text);
+
+    char code[ARR_SIZ] = { 0 };
+    char * code_ = NULL;
+    while (is_code_exists) {
+        code_ = fgets(code, ARR_SIZ, answer);
+        if (code_ != NULL) {
+            code_ = trim_whitespace(code_);
+            if (code_[0] == 0) {  // 공백 라인 스킵
+                continue;
+            }
+            int cursor = adjust_include_str(code);
+            fprintf(score, "%s\n", code);
+        } else {
+            break;
+        }
+    }
+    fprintf(score, "</pre></details></div>\n");
+}
+
+
+void print_test_case(FILE * answer, FILE * input, short case_status, int case_number, char * state, FILE * score) {
+    char * backgroud_color = (case_status > 0) ? "success" : (case_status == 0) ? "danger" : "primary";
+
+    fprintf(score, "<div class=\"p-2 mb-2 bg-%s text-white test-result\"><details><summary>테스트 케이스 %d%s</summary><pre class=\"mb-0\">\n", backgroud_color, case_number+1, state);
+
+    char ans[ARR_SIZ] = { 0 };
+    char * ans_ = NULL;
+    while (input) {
+        ans_ = fgets(ans, ARR_SIZ, input);
+        if (ans_ != NULL) {
+            ans_ = trim_whitespace(ans);
+            if (ans_[0] == 0) {  // 공백 라인 스킵
+                continue;
+            }
+            fprintf(score, ">> %s\n", ans);
+        } else {
+            break;
+        }
+    }
+    if (input) {
+        fprintf(score, "---------------------------------\n");
+    }
+    while (answer) {
+        ans_ = fgets(ans, ARR_SIZ, answer);
+        if (ans_ != NULL) {
+            ans_ = trim_whitespace(ans);
+            if (ans_[0] == 0) {  // 공백 라인 스킵
+                continue;
+            }
+            fprintf(score, "%s\n", ans);
+        } else {
+            break;
+        }
+    }
+    fprintf(score, "</pre></details></div>\n");
+}
+
+
+int adjust_include_str(char * str) {
+    _Bool is_found = 0;
+    int cursor = 0;
+    const char include_str[] = "#include <";
+    char * _str = include_str;
+
+    while (1) {
+        if (*_str == 0) {
+            break;
+        } else if (*str == 0) {
+            cursor = -1;
+            break;
+        }
+        if (*(str++) == *_str) {
+            is_found = 1;
+            _str++;
+        } else if (is_found) {
+            is_found = 0;
+            cursor = -1;
+            break;
+        }
+        cursor++;
+    }
+
+    if (cursor >= 0) {
+        str--;
+        (*str) = '"';
+        while (*str) {
+            if (*str == '>') {
+                (*str) = '"';
+                break;
+            }
+            str++;
+        }
+    }
+
+    return cursor;
 }
