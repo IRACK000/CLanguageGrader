@@ -14,19 +14,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      - name: Build the JupyterLite site
+      - name: Copy Score File
         run: |
-          mkdir dist
-          cp README.md dist
-          cp src/Grader/RESULT_GRADE/SCORE_OUT.html dist
+          cp src/Grader/Grader/RESULT_GRADE/SCORE_OUT.html .
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: ./dist
+          path: ./
 
   deploy:
     needs: build
