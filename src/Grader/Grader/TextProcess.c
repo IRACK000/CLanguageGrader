@@ -211,7 +211,7 @@ void set_new_answer(PathList path) {
     system("MKDIR ANSWER");
 
     // 정답 소스 파일 있으면 컴파일
-    printf("정답 소스 파일이 있다면 ANSWER 폴더 안에 넣어주세요.");
+    printf("\n\n정답 소스 파일이 있다면 ANSWER 폴더 안에 넣어주세요. ");
     system("PAUSE");
     compile_sources(path, "ANSWER\\", "", 0);
 
@@ -257,6 +257,7 @@ void set_new_answer(PathList path) {
                     "ANSWER\\%s%d.exe  < ANSWER\\%s%d\\%d.stdin",
                     hw_series, string_index, hw_series, string_index, test_index + 1
                 );
+                system(cmd_buffer);
                 sprintf(
                     cmd_buffer,
                     "ANSWER\\%s%d.exe  < ANSWER\\%s%d\\%d.stdin >  ANSWER\\%s%d\\%d.stdout",
