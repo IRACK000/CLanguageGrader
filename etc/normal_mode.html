@@ -3,19 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <!-- Bootstrap Assets -->
+    <script src="/cdn/bootstrap/5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <link href="/cdn/bootstrap/5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="/cdn/bootstrap-icons/1.11.1/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous"/>
 </head>
 <body>
-    <video
-        src="/etc/normal_mode.mp4"
-        controls
-        autoplay
-        style="
-            position:absolute;
-            left:50%;
-            top:50%;
-            -webkit-transform:translate(-50%, -50%);
-            transform:translate(-50%, -50%);
-        "
-    ></video>
+    <section id="instruction" class="instruction">
+        <div class="container">
+            <div class="row content mx-auto">
+
+                <div style="height: 780px"></div>
+                <video
+                    src="/CLanguageGrader/etc/normal_mode.mp4"
+                    controls
+                    autoplay
+                    style="
+                    position:absolute;
+                    left:50%;
+                    top:50%;
+                    -webkit-transform:translate(-50%, -50%);
+                    transform:translate(-50%, -50%);
+                    "
+                ></video>
+            </div>
+        </div>
+    </section>
 </body>
 </html>
