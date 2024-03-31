@@ -251,7 +251,7 @@ void set_new_answer(PathList path) {
             system(cmd_buffer);
             sprintf(cmd_buffer, "ANSWER\\%s%d.exe", hw_series, string_index);
             if (is_exist(cmd_buffer, "", 0)) {
-                printf("\n%d번 문제의 정답 실행 파일이 존재합니다. 자동으로 해답 데이터를 생성합니다.", string_index+1);
+                printf("\n%d번 문제의 정답 실행 파일이 존재합니다. 자동으로 해답 데이터를 생성합니다.\n", string_index+1);
                 sprintf(
                     cmd_buffer,
                     "ANSWER\\%s%d.exe  < ANSWER\\%s%d\\%d.stdin",
