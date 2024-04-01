@@ -104,7 +104,7 @@ compiler = clang
 1. 최신 [release](https://github.com/b-re-w/CLanguageGrader/releases) 배포 파일을 다운받아 압축을 해제한다.
 2. 학생들이 제출한 과제들을 전부 HOMEWORK 폴더 하위에 압축 해제한다. 이때, 하위 폴더의 구조는 학번_이름 형태여야 하며, 학번_이름 폴더 안에 .c코드가 바로 들어있어야 한다.
 3. Grader.exe를 실행한다.
-4. 실행 모드를 전체 자동 배치모드 (교수님 채점 모드)로 사용할 것인지 아니면 일반 모드 (학생 확인 모드)로 사용할 것인지 지정한다.
+4. 실행 모드를 전체 [자동 배치모드](https://b-re-w.github.io/CLanguageGrader/etc/batch_mode.html) (교수님 채점 모드)로 사용할 것인지 아니면 [일반 모드](https://b-re-w.github.io/CLanguageGrader/etc/normal_mode.html) (학생 확인 모드)로 사용할 것인지 지정한다.
 5. 새 테스트 케이스를 입력할 것인지 기존 케이스를 사용할 것인지 선택한다.
 6. 프로그램이 HOMEWORK의 하위 디렉토리를 검색하여 *.cpp가 있을 경우 *.c로 모두 변경해준다.
 7. 개별 학생 과제에 대해 컴파일이 자동으로 진행된다.
